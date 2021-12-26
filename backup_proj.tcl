@@ -14,6 +14,50 @@ proc gen_folder_structure { outPath } {
     file mkdir "$outPath/$::env(swRepos)"
 }
 
+################################################
+# Process to check and copy files
+################################################
+proc copy_files { inpFileList destPath excludePattern } {
+    foreach filename $inpFileList {
+        set isCopy true
+               
+        foreach mask $excludePattern {
+            if [ regexp $mask $filename ] {
+                set isCopy false
+                break
+            }
+        }
+        
+        if { $isCopy } {
+            if ![ regexp [file normalize $destPath] [file dirname [file normalize $filename]] ] {
+                    file copy -force [file normalize $filename] $destPath 
+            }
+        }
+    }    
+}
+
+################################################################
+# Get list of file by pattern contain in set folder and it subfolders
+################################################################
+proc get_file_list { folder pattern } {
+    set basedir [string trimright [file join [file normalize $folder] { }]]
+    set fileList {}
+
+    foreach fileName [glob -nocomplain -type {f r} -path $basedir $pattern] {
+        lappend fileList $fileName
+    }
+
+    foreach dirName [glob -nocomplain -type {d  r} -path $basedir *] {
+        set subDirList [get_file_list $dirName $pattern]
+        if { [llength $subDirList] > 0 } {
+            foreach subDirFile $subDirList {
+                lappend fileList $subDirFile
+            }
+        }
+    }
+    return $fileList
+}
+
 ###########################################
 # Check is tcl file of backup folder exists
 ###########################################
@@ -145,62 +189,24 @@ proc gen_alone_ip_tcl { outPath } {
 ################################################
 proc check_sources { outPath } {
         
-    puts "Simaulation sources"
+    puts "Waveform configs"
     foreach fset [get_filesets -filter { FILESET_TYPE == SimulationSrcs }] {
-        foreach filname [get_files -of_objects [get_filesets $fset]] {
-            if ![ regexp {/bd/} $filname ] {
-                
-                if [ regexp {\.xci$} $filname ] {
-                    #puts "SKIPP: $filname"
-                    continue
-                }
-                
-                if [ regexp {\.wcfg$} $filname ] {
-                    set destPath "$outPath/wcfg"
-                    if { [file dirname [file normalize $filname]] ne [file normalize $destPath] } {
-                       puts "BCKUP_INFO: Copy to $destPath file $filname"
-                       file copy -force [file normalize $filname] $destPath 
-                    }
-                } else {
-                    set destPath "$outPath/tb"
-                    if { [file dirname [file normalize $filname]] ne [file normalize $destPath] } {
-                       puts "BCKUP_INFO: Copy to $destPath file $filname"
-                       file copy -force [file normalize $filname] $destPath 
-                    }
-                }
-            }
-        }
+        copy_files [get_files -of_objects [get_filesets $fset]] "$outPath/$::env(waveConfig)" "/bd/ \.xci$ \.v$ \.vs$ \.vhdl$"
     }
     
+    puts "Simaulation sources"
+    foreach fset [get_filesets -filter { FILESET_TYPE == SimulationSrcs }] {
+        copy_files [get_files -of_objects [get_filesets $fset]] "$outPath/$::env(testPath)" "/bd/ \.xci$ \.wcfg$"
+    }
+        
     puts "Constraints sources"
-    set destPath "$outPath/xdc"
     foreach fset [get_filesets -filter { FILESET_TYPE == Constrs }] {
-        foreach filname [get_files -of_objects [get_filesets $fset]] {
-            if ![ regexp {/bd/} $filname ] {
-                  if { [file dirname [file normalize $filname]] ne [file normalize $destPath] } {
-                   puts "BCKUP_INFO: Copy to $destPath file $filname"
-                   file copy -force [file normalize $filname] $destPath 
-                } 
-            }
-        }
-    }  
-    
+        copy_files [get_files -of_objects [get_filesets $fset]] "$outPath/$::env(xdcPath)" "/bd/"
+    }
+       
     puts "Designe sources"
-    set destPath "$outPath/hdl"    
     foreach fset [get_filesets -filter { FILESET_TYPE == DesignSrcs }] {
-        foreach filname [get_files -of_objects [get_filesets $fset]] {
-            if [ regexp {\.xci$} $filname ] {
-                    #puts "SKIPP: $filname"
-                    continue
-                }
-            
-            if ![ regexp {/bd/} $filname ] {
-                if { [file dirname [file normalize $filname]] ne [file normalize $destPath] } {
-                   puts "BCKUP_INFO: Copy to $destPath file $filname"
-                   file copy -force [file normalize $filname] $destPath 
-                }
-            }
-        }
+        copy_files [get_files -of_objects [get_filesets $fset]] "$outPath/$::env(hdlPath)" "\.xci$ /bd/"
     }
 }
 
