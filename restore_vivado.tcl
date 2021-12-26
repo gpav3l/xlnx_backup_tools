@@ -27,6 +27,28 @@ if { [string first $scripts_vivado_version $current_vivado_version] == -1 } {
    return 1
 }
 
+################################################################
+# Get list of file by pattern contain in set folder and it subfolders
+################################################################
+proc get_file_list { folder pattern } {
+    set basedir [string trimright [file join [file normalize $folder] { }]]
+    set fileList {}
+
+    foreach fileName [glob -nocomplain -type {f r} -path $basedir $pattern] {
+        lappend fileList $fileName
+    }
+
+    foreach dirName [glob -nocomplain -type {d  r} -path $basedir *] {
+        set subDirList [get_file_list $dirName $pattern]
+        if { [llength $subDirList] > 0 } {
+            foreach subDirFile $subDirList {
+                lappend fileList $subDirFile
+            }
+        }
+    }
+    return $fileList
+}
+
 ##################################################################
 # Project PROCs
 ##################################################################
@@ -46,28 +68,32 @@ proc createProject { } {
     set_property  ip_repo_paths  $::env(ipRepoPath) [current_project]
     update_ip_catalog
 
-    set fileList [glob -nocomplain -directory $::env(xdcPath) *.xdc]
+    #set fileList [glob -nocomplain -directory $::env(xdcPath) *.xdc]
+    set fileList [get_file_list $::env(xdcPath) *.xdc]
     if {[llength $fileList]} {
         add_files  -fileset constrs_1 -norecurse $fileList
     } else {
         puts "RESTORE_INFO: XDC file not found";
     }
 
-    set fileList [glob -nocomplain -directory $::env(hdlPath) *.v]
+    #set fileList [glob -nocomplain -directory $::env(hdlPath) *.v]
+    set fileList [get_file_list $::env(hdlPath) *.v]
     if {[llength $fileList]} {
         add_files -norecurse $fileList
     } else {
         puts "RESTORE_INFO: HDL file not found";
     }
 
-    set fileList [glob -nocomplain -directory $::env(testPath) *.{v,sv}]
+    #set fileList [glob -nocomplain -directory $::env(testPath) *.{v,sv}]
+    set fileList [get_file_list $::env(testPath) *.{v,sv}]
     if {[llength $fileList]} {
         add_files -fileset sim_1 -norecurse $fileList
     } else {
         puts "RESTORE_INFO: HDL file not found";
     }
 
-    set fileList [glob -nocomplain -directory $::env(waveConfig) *.wcfg]
+    #set fileList [glob -nocomplain -directory $::env(waveConfig) *.wcfg]
+    set fileList [get_file_list $::env(waveConfig) *.wcfg]
     if {[llength $fileList]} {
         add_files -fileset sim_1 -norecurse $fileList
         set_property xsim.view $fileList [get_filesets sim_1]
