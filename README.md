@@ -20,6 +20,7 @@ Script not restore:
 `backup_vivado` is main command that generate a few tcl:
 
 - Tcl with board, device and project name info (gen_config.tcl) 
+- Generate folder structure
 - Copy HDL and XDC file from Vivado project into backup folder, with sort by hdl, xdc and tb folders
 - One tcl for restore every blocke designe (template of name is bd_des_<designe_name>.tcl)
 - tcl for restore IP core (name stand_alone_ip.tcl)
@@ -28,7 +29,9 @@ User allow change some config, by edit user_config.tcl file.
 
 # Template structure
 
-Template contain a few folder, help You sort source by it usage
+Template contain a few folder, help You sort source by it usage (folders name config over user_config.tcl)
+For generate folder structure, source backup_vivado.tcl and call `gen_folder_structure <path_of_backup_folder>`. 
+Also that folder will be generate automaticaly when You call backup_vivado process.
 
 * core/ - Folder for save custom IP core
 * hdl/ - Folder for save source (Verilog, System Verilog and VHDL) usage for synthesis
@@ -58,3 +61,5 @@ Template contain a few folder, help You sort source by it usage
 * Open Vivado
 * Found tcl console input
 * launch restore by input `source -notrace <path_to>/restore_vivado.tcl`
+
+Also You can use restore to create new project, but it require manually edit get_config.tcl file.

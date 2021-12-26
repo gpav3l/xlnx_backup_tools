@@ -12,6 +12,7 @@ cd $script_folder
 
 source gen_config.tcl
 source user_config.tcl
+source backup_proj.tcl
 
 ################################################################
 # Check if script is running in correct Vivado version.

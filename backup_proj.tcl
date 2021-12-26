@@ -1,5 +1,19 @@
 set env(backup_path) [file dirname [file normalize [info script]]]
-    
+
+###########################################
+# Create folder structure
+###########################################    
+proc gen_folder_structure { outPath } {
+    file mkdir "$outPath/$::env(ipRepoPath)"
+    file mkdir "$outPath/$::env(hdlPath)"
+    file mkdir "$outPath/$::env(xdcPath)"
+    file mkdir "$outPath/$::env(testPath)"
+    file mkdir "$outPath/$::env(waveConfig)"
+    file mkdir "$outPath/$::env(hlsSrcs)"
+    file mkdir "$outPath/$::env(swSrcs)"
+    file mkdir "$outPath/$::env(swRepos)"
+}
+
 ###########################################
 # Check is tcl file of backup folder exists
 ###########################################
@@ -13,6 +27,9 @@ proc check_tcls { outPath } {
         puts "BCKUP_INFO: restore_vivado.tcl is not found"
         set isFound 1
     }
+    
+    # Create all necesary folder if it not exist
+    gen_folder_structure $outPath
     
     return $isFound
 }
