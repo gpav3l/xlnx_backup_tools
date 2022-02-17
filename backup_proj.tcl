@@ -1,5 +1,9 @@
 set env(backup_path) [file dirname [file normalize [info script]]]
 
+cd $::env(backup_path)
+source gen_config.tcl
+source user_config.tcl
+
 ###########################################
 # Create folder structure
 ###########################################    
