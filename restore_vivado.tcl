@@ -123,9 +123,9 @@ if {[llength $fileList]} {
 
 # If exists restore standalone IP cores
 puts "RESTORE_INFO: Try restore IP cores";
-if { [file exists "$script_folder/stand_alone_ip.tcl"] } {
+if { [file exists $script_folder/stand_alone_ip.tcl] } {
     puts "RESTORE_INFO: Try execute $script_folder/stand_alone_ip.tcl"
-    source [get_script_folder]/stand_alone_ip.tcl
+    source $script_folder/stand_alone_ip.tcl
 } else {
     puts "RESTORE_INFO: Standalone IP not found";
 }
