@@ -45,5 +45,5 @@ foreach projName [get_proj_list $script_folder] {
     app config -name $projName libraries m
 
     exec rm -r [getws]/$projName/src
-    file link -symbolic [getws]/$projName/src $projDir/sw_srcs
+    file link -symbolic [getws]/$projName/src $projDir/src
 }
