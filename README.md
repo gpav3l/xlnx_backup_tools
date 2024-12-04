@@ -63,3 +63,21 @@ Also that folder will be generate automaticaly when You call backup_vivado proce
 * launch restore by input `source -notrace <path_to>/restore_vivado.tcl`
 
 Also You can use restore to create new project, but it require manually edit get_config.tcl file.
+
+# Example for bsp_init.tcl
+
+```tcl
+bsp config hypervisor_guest true
+
+bsp setlib lwip211
+bsp config lwip_dhcp true
+bsp config dhcp_does_arp_check true
+bsp config mem_size 524288
+bsp config memp_n_pbuf 1024
+bsp config memp_n_tcp_seg 1024
+bsp config n_rx_descriptors 512
+bsp config n_tx_descriptors 512
+bsp config pbuf_pool_size 16384
+bsp config tcp_snd_buf 65535
+bsp config tcp_wnd 65535
+```
